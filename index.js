@@ -1,4 +1,5 @@
 const express = require("express");
+const firebase = require("./firebase");
 
 const app = express();
 
@@ -7,8 +8,23 @@ app.set("port", port);
 
 app.listen(port, () => console.log(`App started on port ${port}.`));
 
-app.get("/", (req, res, next) => {
+app.get("/", async (req, res, next) => {
   res.set({ "Access-Control-Allow-Origin": "*" });
 
-  return res.send("Hello World xxx");
+  let data;
+  await firebase.db
+    .collection("users")
+    .where("id", "==", "1")
+    .get()
+    .then((snapshot) => {
+      snapshot.forEach((doc) => {
+        data = doc.data();
+        console.log(doc.id, "=>", doc.data());
+      });
+    })
+    .catch((err) => {
+      console.log("Error", err);
+    });
+
+  return res.send(data);
 });
